@@ -1,0 +1,5 @@
+{
+    "board": "arduino:avr:uno",
+    "sketch": "SmartCar_Core20191227.ino",
+    "port": "COM7"
+}

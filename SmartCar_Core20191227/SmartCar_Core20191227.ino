@@ -1,3 +1,5 @@
+#include <ArduinoJson.h>
+#include "debugPrint.h"
 /*
    @Description: In User Settings Edi
    @Author: your name
@@ -6,28 +8,15 @@
    @LastEditors: Please set LastEditors
 */
 #include <IRremote.h>
+#include "remote_keys.h"
+
 #include <Servo.h>
 #include <stdio.h>
 
 #include "HardwareSerial.h"
 
-#include "ArduinoJson-v6.11.1.h" //Use ArduinoJson Libraries
-
-#define f 16736925    // FORWARD  
-#define b 16754775    // BACK     
-#define l 16720605    // LEFT     
-#define r 16761405    // RIGHT    
-#define s 16712445    // STOP     
-#define KEY1 16738455 //Line Teacking mode       
-#define KEY2 16750695 //Obstacles Avoidance mode 
-
-#define KEY_STAR 16728765
-#define KEY_HASH 16732845
-
-
 /*Arduino pin is connected to the IR Receiver*/
 #define RECV_PIN 12
-
 
 /*Arduino pin is connected to the Ultrasonic sensor module*/
 #define ECHO_PIN A4
@@ -114,8 +103,8 @@ void delays(unsigned long t)
   for (unsigned long i = 0; i < t; i++)
   {
     // getBTData();
-    getBTData_Plus();//Bluetooth Communication Data Acquisition
-    getIRData(); //Infrared Communication Data Acquisition
+    getBTData_Plus(); //Bluetooth Communication Data Acquisition
+    getIRData();      //Infrared Communication Data Acquisition
     delay(1);
   }
 }
@@ -242,95 +231,95 @@ void getBTData_Plus(void)
 
       switch (control_mode_N)
       {
-        case 21: /*Ultrasonic module  processing <command：N 21>*/
-          DIY_UltrasoundModuleStatus_Plus(doc["D1"]);
-          break;
-        case 22: /*Trace module data processing <command：N 22>*/
-          DIY_TraceModuleStatus_Plus(doc["D1"]);
-          break;
-        case 1: /*Motion module  processing <command：N 1>*/
-          func_mode = DIY_MotorControl;
-          DIY_MotorSelection = doc["D1"];
-          DIY_MotorDirection = doc["D2"];
-          DIY_MotorSpeed = doc["D3"];
+      case 21: /*Ultrasonic module  processing <command：N 21>*/
+        DIY_UltrasoundModuleStatus_Plus(doc["D1"]);
+        break;
+      case 22: /*Trace module data processing <command：N 22>*/
+        DIY_TraceModuleStatus_Plus(doc["D1"]);
+        break;
+      case 1: /*Motion module  processing <command：N 1>*/
+        func_mode = DIY_MotorControl;
+        DIY_MotorSelection = doc["D1"];
+        DIY_MotorDirection = doc["D2"];
+        DIY_MotorSpeed = doc["D3"];
 
+        //Serial.print("{ok}");
+        Serial.print('{' + CommandSerialNumber + "_ok}");
+        break;
+      case 4: /*Motion module  processing <command：N 4>*/
+        func_mode = DIY_CarControl;
+        DIY_CarDirection = doc["D1"];
+        DIY_CarSpeed = doc["D2"];
+        DIY_CarTimer = doc["T"];
+        DIY_CarControl_Millis = millis(); //Get the timestamp
+        //Serial.print("{ok}");
+        break;
+      case 40:
+        func_mode = DIY_CarControlxxx;
+        DIY_CarDirectionxxx = doc["D1"];
+        DIY_CarSpeedxxx = doc["D2"];
+        //Serial.print("{ok}");
+        Serial.print('{' + CommandSerialNumber + "_ok}");
+        break;
+      case 5: /*Clear mode  processing <command：N 5>*/
+        func_mode = DIY_ClearAllFunctions;
+        //Serial.print("{ok}");
+        Serial.print('{' + CommandSerialNumber + "_ok}");
+        break;
+      case 3:               /*Remote switching mode  processing <command：N 3>*/
+        if (1 == doc["D1"]) // Line Teacking Mode
+        {
+          func_mode = LineTeacking;
           //Serial.print("{ok}");
           Serial.print('{' + CommandSerialNumber + "_ok}");
-          break;
-        case 4: /*Motion module  processing <command：N 4>*/
-          func_mode = DIY_CarControl;
-          DIY_CarDirection = doc["D1"];
-          DIY_CarSpeed = doc["D2"];
-          DIY_CarTimer = doc["T"];
-          DIY_CarControl_Millis = millis(); //Get the timestamp
-          //Serial.print("{ok}");
-          break;
-        case 40:
-          func_mode = DIY_CarControlxxx;
-          DIY_CarDirectionxxx = doc["D1"];
-          DIY_CarSpeedxxx = doc["D2"];
+        }
+        else if (2 == doc["D1"]) //Obstacles Avoidance Mode
+        {
+          func_mode = ObstaclesAvoidance;
           //Serial.print("{ok}");
           Serial.print('{' + CommandSerialNumber + "_ok}");
-          break;
-        case 5: /*Clear mode  processing <command：N 5>*/
-          func_mode = DIY_ClearAllFunctions;
-          //Serial.print("{ok}");
-          Serial.print('{' + CommandSerialNumber + "_ok}");
-          break;
-        case 3: /*Remote switching mode  processing <command：N 3>*/
-          if (1 == doc["D1"]) // Line Teacking Mode
-          {
-            func_mode = LineTeacking;
-            //Serial.print("{ok}");
-            Serial.print('{' + CommandSerialNumber + "_ok}");
-          }
-          else if (2 == doc["D1"]) //Obstacles Avoidance Mode
-          {
-            func_mode = ObstaclesAvoidance;
-            //Serial.print("{ok}");
-            Serial.print('{' + CommandSerialNumber + "_ok}");
-          }
-          break;
-        case 2: /*Remote switching mode  processing <command：N 2>*/
+        }
+        break;
+      case 2: /*Remote switching mode  processing <command：N 2>*/
 
-          if (1 == doc["D1"])
-          {
-            func_mode = Bluetooth;
-            mov_mode = LEFT;
-            //Serial.print("{ok}");
-            Serial.print('{' + CommandSerialNumber + "_ok}");
-          }
-          else if (2 == doc["D1"])
-          {
-            func_mode = Bluetooth;
-            mov_mode = RIGHT;
-            //Serial.print("{ok}");
-            Serial.print('{' + CommandSerialNumber + "_ok}");
-          }
-          else if (3 == doc["D1"])
-          {
-            func_mode = Bluetooth;
-            mov_mode = FORWARD;
-            //Serial.print("{ok}");
-            Serial.print('{' + CommandSerialNumber + "_ok}");
-          }
-          else if (4 == doc["D1"])
-          {
-            func_mode = Bluetooth;
-            mov_mode = BACK;
-            //Serial.print("{ok}");
-            Serial.print('{' + CommandSerialNumber + "_ok}");
-          }
-          else if (5 == doc["D1"])
-          {
-            func_mode = Bluetooth;
-            mov_mode = STOP;
-            //Serial.print("{ok}");
-            Serial.print('{' + CommandSerialNumber + "_ok}");
-          }
-          break;
-        default:
-          break;
+        if (1 == doc["D1"])
+        {
+          func_mode = Bluetooth;
+          mov_mode = LEFT;
+          //Serial.print("{ok}");
+          Serial.print('{' + CommandSerialNumber + "_ok}");
+        }
+        else if (2 == doc["D1"])
+        {
+          func_mode = Bluetooth;
+          mov_mode = RIGHT;
+          //Serial.print("{ok}");
+          Serial.print('{' + CommandSerialNumber + "_ok}");
+        }
+        else if (3 == doc["D1"])
+        {
+          func_mode = Bluetooth;
+          mov_mode = FORWARD;
+          //Serial.print("{ok}");
+          Serial.print('{' + CommandSerialNumber + "_ok}");
+        }
+        else if (4 == doc["D1"])
+        {
+          func_mode = Bluetooth;
+          mov_mode = BACK;
+          //Serial.print("{ok}");
+          Serial.print('{' + CommandSerialNumber + "_ok}");
+        }
+        else if (5 == doc["D1"])
+        {
+          func_mode = Bluetooth;
+          mov_mode = STOP;
+          //Serial.print("{ok}");
+          Serial.print('{' + CommandSerialNumber + "_ok}");
+        }
+        break;
+      default:
+        break;
       }
     }
   }
@@ -379,46 +368,49 @@ void getBTData_Plus(void)
 /*
   Infrared Communication Data Acquisition
 */
+
 void getIRData(void)
 {
-
   if (irrecv.decode(&results))
   {
     IR_PreMillis = millis();
-    switch (results.value)
+    int result = results.value;
+    switch (result)
     {
-      case f:
-        func_mode = IRremote;
-        mov_mode = FORWARD;
-        break; /*forward*/
-      case b:
-        func_mode = IRremote;
-        mov_mode = BACK;
-        break; /*back*/
-      case l:
-        func_mode = IRremote;
-        mov_mode = LEFT;
-        break; /*left*/
-      case r:
-        func_mode = IRremote;
-        mov_mode = RIGHT;
-        break; /*right*/
-      case s:
-        func_mode = IRremote;
-        mov_mode = STOP;
-        break; /*stop*/
-      case KEY1:
-        func_mode = LineTeacking;
-        break; /*Line Teacking Mode*/
-      case KEY2:
-        func_mode = ObstaclesAvoidance;
-        break; /*Obstacles Avoidance Mode*/
-      default:
-        break;
+    case KEY_UP:
+      debug_print(128, "forward", 0);
+      func_mode = IRremote;
+      mov_mode = FORWARD;
+      break; /*forward*/
+    case KEY_DOWN:
+      func_mode = IRremote;
+      mov_mode = BACK;
+      break; /*back*/
+    case KEY_LEFT:
+      func_mode = IRremote;
+      mov_mode = LEFT;
+      break; /*left*/
+    case KEY_RIGHT:
+      func_mode = IRremote;
+      mov_mode = RIGHT;
+      break; /*right*/
+    case KEY_OK:
+      func_mode = IRremote;
+      mov_mode = STOP;
+      break; /*stop*/
+    case KEY_1:
+      func_mode = LineTeacking;
+      break; /*Line Teacking Mode*/
+    case KEY_2:
+      func_mode = ObstaclesAvoidance;
+      break; /*Obstacles Avoidance Mode*/
+    default:
+      break;
     }
     irrecv.resume();
   }
 }
+
 /*
   Bluetooth remote control mode
 */
@@ -428,23 +420,23 @@ void bluetooth_mode()
   {
     switch (mov_mode)
     {
-      case FORWARD:
-        forward(false, carSpeed);
-        break;
-      case BACK:
-        back(false, carSpeed);
-        break;
-      case LEFT:
-        left(false, carSpeed);
-        break;
-      case RIGHT:
-        right(false, carSpeed);
-        break;
-      case STOP:
-        stop();
-        break;
-      default:
-        break;
+    case FORWARD:
+      forward(false, carSpeed);
+      break;
+    case BACK:
+      back(false, carSpeed);
+      break;
+    case LEFT:
+      left(false, carSpeed);
+      break;
+    case RIGHT:
+      right(false, carSpeed);
+      break;
+    case STOP:
+      stop();
+      break;
+    default:
+      break;
     }
   }
 }
@@ -457,23 +449,23 @@ void irremote_mode(void)
   {
     switch (mov_mode)
     {
-      case FORWARD:
-        forward(false, carSpeed);
-        break;
-      case BACK:
-        back(false, carSpeed);
-        break;
-      case LEFT:
-        left(false, carSpeed);
-        break;
-      case RIGHT:
-        right(false, carSpeed);
-        break;
-      case STOP:
-        stop();
-        break;
-      default:
-        break;
+    case FORWARD:
+      forward(false, carSpeed);
+      break;
+    case BACK:
+      back(false, carSpeed);
+      break;
+    case LEFT:
+      left(false, carSpeed);
+      break;
+    case RIGHT:
+      right(false, carSpeed);
+      break;
+    case STOP:
+      stop();
+      break;
+    default:
+      break;
     }
     if (millis() - IR_PreMillis > 500)
     {
@@ -501,18 +493,18 @@ void line_teacking_mode(void)
       right(false, carSpeed); //Control motor：the car moving right
       while (LineTeacking_Read_Right)
       {
-        getBTData_Plus();//Bluetooth data acquisition
+        getBTData_Plus(); //Bluetooth data acquisition
         //getBTData();
         getIRData(); //Infrared data acquisition
       }
       LT_PreMillis = millis();
     }
     else if (LineTeacking_Read_Left)
-    { //Detecting in the left infrared tube
+    {                        //Detecting in the left infrared tube
       left(false, carSpeed); //Control motor：the car moving left
       while (LineTeacking_Read_Left)
       {
-        getBTData_Plus();//Bluetooth data acquisition
+        getBTData_Plus(); //Bluetooth data acquisition
         //getBTData();
         getIRData(); //Infrared data acquisition
       }
@@ -627,24 +619,24 @@ void obstacles_avoidance_mode(void)
       {
         switch (switc_ctrl)
         {
-          case 0 ... 1:
-            left(false, 150); //Control motor：The car moves forward and left
-            break;
-          case 2:
-            right(false, 150); //Control motor：The car moves forward and right
-            break;
-          case 3:
-            forward(false, 150); //Control motor：the car moving forwar
-            break;
-          case 4 ... 5:
-            left(false, 150); //Control motor：The car moves forward and left
-            break;
-          case 6:
-            right(false, 100); //Control motor：The car moves forward and right
-            break;
-          case 7:
-            back(false, 150); //Control motor：Car backwards
-            break;
+        case 0 ... 1:
+          left(false, 150); //Control motor：The car moves forward and left
+          break;
+        case 2:
+          right(false, 150); //Control motor：The car moves forward and right
+          break;
+        case 3:
+          forward(false, 150); //Control motor：the car moving forwar
+          break;
+        case 4 ... 5:
+          left(false, 150); //Control motor：The car moves forward and left
+          break;
+        case 6:
+          right(false, 100); //Control motor：The car moves forward and right
+          break;
+        case 7:
+          back(false, 150); //Control motor：Car backwards
+          break;
         }
       }
       else
@@ -844,20 +836,20 @@ void DIY_CarControl_Plus(uint8_t is_CarDirection, uint8_t is_CarSpeed, uint8_t i
     {
       switch (is_CarDirection)
       {
-        case 1: /*Left-Forward Motion Mode*/
-          left(false, is_CarSpeed);
-          break;
-        case 2: /*Right-Forward Motion Mode*/
-          right(false, is_CarSpeed);
-          break;
-        case 3: /*Sport mode forward*/
-          forward(false, is_CarSpeed);
-          break;
-        case 4: /*Sport mode back*/
-          back(false, is_CarSpeed);
-          break;
-        default:
-          break;
+      case 1: /*Left-Forward Motion Mode*/
+        left(false, is_CarSpeed);
+        break;
+      case 2: /*Right-Forward Motion Mode*/
+        right(false, is_CarSpeed);
+        break;
+      case 3: /*Sport mode forward*/
+        forward(false, is_CarSpeed);
+        break;
+      case 4: /*Sport mode back*/
+        back(false, is_CarSpeed);
+        break;
+      default:
+        break;
       }
     }
   }
@@ -887,20 +879,20 @@ void DIY_CarControl_Plusxxx(uint8_t is_CarDirection, uint8_t is_CarSpeed)
     CarControl = true;
     switch (is_CarDirection)
     {
-      case 1: /*Left-Forward Motion Mode*/
-        left(false, is_CarSpeed);
-        break;
-      case 2: /*Right-Forward Motion Mode*/
-        right(false, is_CarSpeed);
-        break;
-      case 3: /*Sport mode forward*/
-        forward(false, is_CarSpeed);
-        break;
-      case 4: /*Sport mode back*/
-        back(false, is_CarSpeed);
-        break;
-      default:
-        break;
+    case 1: /*Left-Forward Motion Mode*/
+      left(false, is_CarSpeed);
+      break;
+    case 2: /*Right-Forward Motion Mode*/
+      right(false, is_CarSpeed);
+      break;
+    case 3: /*Sport mode forward*/
+      forward(false, is_CarSpeed);
+      break;
+    case 4: /*Sport mode back*/
+      back(false, is_CarSpeed);
+      break;
+    default:
+      break;
     }
   }
   else
