@@ -1,11 +1,8 @@
-#include <ArduinoJson.h>
-#include "debugPrint.h"
 /*
    @Description: In User Settings Edi
-   @Author: your name
-   @Date: 2019-08-12 18:00:25
-   @LastEditTime: 2019-08-27 10:45:29
-   @LastEditors: Please set LastEditors
+   @Author: Nino
+   @Date: 2020-01-12 18:00:25
+   @LastEditTime: 2020-12-05 22:00:00
 */
 #include <IRremote.h>
 #include "remote_keys.h"
@@ -14,28 +11,9 @@
 #include <stdio.h>
 
 #include "HardwareSerial.h"
-
-/*Arduino pin is connected to the IR Receiver*/
-#define RECV_PIN 12
-
-/*Arduino pin is connected to the Ultrasonic sensor module*/
-#define ECHO_PIN A4
-#define TRIG_PIN A5
-
-/*Arduino pin is connected to the Motor drive module*/
-#define ENA 5
-#define ENB 6
-#define IN1 7
-#define IN2 8
-#define IN3 9
-#define IN4 11
-
-#define LED_Pin 13
-
-/*Arduino pin is connected to the IR tracking module*/
-#define LineTeacking_Pin_Right 10
-#define LineTeacking_Pin_Middle 4
-#define LineTeacking_Pin_Left 2
+#include <ArduinoJson.h>
+#include "debugPrint.h"
+#include "pins.h"
 
 #define LineTeacking_Read_Right !digitalRead(10) //Right
 #define LineTeacking_Read_Middle !digitalRead(4) //Middle
