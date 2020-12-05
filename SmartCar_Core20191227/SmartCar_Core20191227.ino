@@ -28,10 +28,6 @@ decode_results results;  //  Create decoding object
 unsigned long IR_PreMillis;
 unsigned long LT_PreMillis;
 
-int rightDistance = 0;  //Right distance
-int leftDistance = 0;   //left Distance
-int middleDistance = 0; //middle Distance
-
 /*DIY_MotorControl: Motor Control： Motor Speed、Motor Direction、Motor Time*/
 uint8_t DIY_MotorSelection;
 uint8_t DIY_MotorDirection;
