@@ -19,7 +19,7 @@
 #define LineTeacking_Read_Middle !digitalRead(4) //Middle
 #define LineTeacking_Read_Left !digitalRead(2)   //Left
 
-#define carSpeed 180 //PWM(Motor speed/Speed)
+#define carSpeed 250 //PWM(Motor speed/Speed)
 
 Servo servo;             //  Create a DC motor drive object
 IRrecv irrecv(RECV_PIN); //  Create an infrared receive drive object
@@ -142,8 +142,8 @@ void back(bool debug, int16_t in_carSpeed)
 void left(bool debug, int16_t in_carSpeed)
 {
 
-  analogWrite(ENA, 250);
-  analogWrite(ENB, 250);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, HIGH);
 
@@ -157,8 +157,8 @@ void left(bool debug, int16_t in_carSpeed)
 */
 void right(bool debug, int16_t in_carSpeed)
 {
-  analogWrite(ENA, 250);
-  analogWrite(ENB, 250);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
   digitalWrite(IN1, HIGH);
   digitalWrite(IN2, LOW);
   digitalWrite(IN3, HIGH);
