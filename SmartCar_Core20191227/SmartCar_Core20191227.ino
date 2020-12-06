@@ -146,45 +146,31 @@ void back(bool debug, int16_t in_carSpeed)
 */
 void left(bool debug, int16_t in_carSpeed)
 {
-  if (allowedMoved())
-  {
-    analogWrite(ENA, 200);
-    analogWrite(ENB, 200);
-    digitalWrite(IN1, LOW);
-    digitalWrite(IN2, HIGH);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
 
-    digitalWrite(IN3, LOW);
-    digitalWrite(IN4, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
 
-    if (debug)
-      Serial.println("Go left!");
-  }
-  else
-  {
-    stop();
-  }
+  if (debug)
+    Serial.println("Go left!");
 }
 /*
   Control motor：The car turns right and moves forward
 */
 void right(bool debug, int16_t in_carSpeed)
 {
-  if (allowedMoved())
-  {
-    analogWrite(ENA, 200);
-    analogWrite(ENB, 200);
-    digitalWrite(IN1, HIGH);
-    digitalWrite(IN2, LOW);
-    digitalWrite(IN3, HIGH);
-    digitalWrite(IN4, LOW);
-    if (debug)
-      Serial.println("Go right!");
-  }
 
-  else
-  {
-    stop();
-  }
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  if (debug)
+    Serial.println("Go right!");
 }
 /*
   Bluetooth serial port data acquisition and control command parsing
