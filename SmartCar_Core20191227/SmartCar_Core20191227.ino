@@ -85,6 +85,21 @@ void delays(unsigned long t)
     delay(1);
   }
 }
+
+/*
+  Blink pin 13
+*/
+
+void blink_pin13(int times)
+{
+  for (int i = 0; i < times; i++)
+  {
+    digitalWrite(13, HIGH);
+    delay(500);
+    digitalWrite(13, LOW);
+    delay(500);
+  }
+}
 /*
   Acquisition Distance: Ultrasound
 */
@@ -348,7 +363,6 @@ void getIRData(void)
     switch (result)
     {
     case KEY_UP:
-      debug_print(128, "forward", 0);
       func_mode = IRremote;
       mov_mode = FORWARD;
       break; /*forward*/
@@ -374,6 +388,15 @@ void getIRData(void)
     case KEY_2:
       func_mode = ObstaclesAvoidance;
       break; /*Obstacles Avoidance Mode*/
+    case KEY_4:
+    //allowedMoved ?  blink_pin13(1) :  blink_pin13(3);
+      if (allowedMoved())
+      {
+        blink_pin13(1);
+      }
+      else{
+        blink_pin13(3);
+      }
     default:
       break;
     }
@@ -935,6 +958,7 @@ void setup(void)
   pinMode(IN4, OUTPUT);
   pinMode(ENA, OUTPUT);
   pinMode(ENB, OUTPUT);
+  pinMode(LED_Pin, OUTPUT);
 
   pinMode(LineTeacking_Pin_Right, INPUT); //Infrared tracking module port configuration
   pinMode(LineTeacking_Pin_Middle, INPUT);
