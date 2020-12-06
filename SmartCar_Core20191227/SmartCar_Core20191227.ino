@@ -9,6 +9,7 @@
 
 #include <Servo.h>
 #include <stdio.h>
+#include "SR04.h"
 
 #include "HardwareSerial.h"
 #include <ArduinoJson.h>
@@ -24,6 +25,8 @@
 Servo servo;             //  Create a DC motor drive object
 IRrecv irrecv(RECV_PIN); //  Create an infrared receive drive object
 decode_results results;  //  Create decoding object
+
+SR04 sr04 = SR04(ECHO_PIN, TRIG_PIN);
 
 unsigned long IR_PreMillis;
 unsigned long LT_PreMillis;
@@ -87,38 +90,40 @@ void delays(unsigned long t)
 */
 unsigned int getDistance(void)
 { //Getting distance
-  static unsigned int tempda = 0;
-  unsigned int tempda_x = 0;
-  digitalWrite(TRIG_PIN, LOW);
-  delayMicroseconds(2);
-  digitalWrite(TRIG_PIN, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(TRIG_PIN, LOW);
-  tempda_x = ((unsigned int)pulseIn(ECHO_PIN, HIGH) / 58);
-  if (tempda_x < 150)
-  {
-    tempda = tempda_x;
-  }
-  else
-  {
-    tempda = 30;
-  }
-  return tempda;
+  long distance = sr04.Distance();
+  return distance;
 }
+/*
+  Stop motor control：Turn off the motor drive
+*/
+void stop(bool debug = false)
+{
+  digitalWrite(ENA, LOW);
+  digitalWrite(ENB, LOW);
+  if (debug)
+    Serial.println("Stop!");
+}
+
 /*
   Control motor：Car movement forward
 */
 void forward(bool debug, int16_t in_carSpeed)
 {
-
-  analogWrite(ENA, in_carSpeed);
-  analogWrite(ENB, in_carSpeed);
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, HIGH);
-  if (debug)
-    Serial.println("Go forward!");
+  if (allowedMoved())
+  {
+    analogWrite(ENA, in_carSpeed);
+    analogWrite(ENB, in_carSpeed);
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, HIGH);
+    if (debug)
+      Serial.println("Go forward!");
+  }
+  else
+  {
+    stop();
+  }
 }
 
 /*
@@ -141,40 +146,45 @@ void back(bool debug, int16_t in_carSpeed)
 */
 void left(bool debug, int16_t in_carSpeed)
 {
+  if (allowedMoved())
+  {
+    analogWrite(ENA, 200);
+    analogWrite(ENB, 200);
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, HIGH);
 
-  analogWrite(ENA, 200);
-  analogWrite(ENB, 200);
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, HIGH);
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, HIGH);
 
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, HIGH);
-  if (debug)
-    Serial.println("Go left!");
+    if (debug)
+      Serial.println("Go left!");
+  }
+  else
+  {
+    stop();
+  }
 }
 /*
   Control motor：The car turns right and moves forward
 */
 void right(bool debug, int16_t in_carSpeed)
 {
-  analogWrite(ENA, 200);
-  analogWrite(ENB, 200);
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
-  if (debug)
-    Serial.println("Go right!");
-}
-/*
-  Stop motor control：Turn off the motor drive
-*/
-void stop(bool debug = false)
-{
-  digitalWrite(ENA, LOW);
-  digitalWrite(ENB, LOW);
-  if (debug)
-    Serial.println("Stop!");
+  if (allowedMoved())
+  {
+    analogWrite(ENA, 200);
+    analogWrite(ENB, 200);
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
+    digitalWrite(IN3, HIGH);
+    digitalWrite(IN4, LOW);
+    if (debug)
+      Serial.println("Go right!");
+  }
+
+  else
+  {
+    stop();
+  }
 }
 /*
   Bluetooth serial port data acquisition and control command parsing
@@ -913,6 +923,12 @@ void DIY_ClearAllFunctionsXXX(void)
 void getDistance_xx(void)
 {
   DIY_Distance = getDistance(); //Ultrasonic measurement distance
+}
+boolean allowedMoved()
+{
+  long distance = getDistance();
+  Serial.println(distance);
+  return distance > 20;
 }
 
 /*****************************************************End@DIY**************************************************************************************/
